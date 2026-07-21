@@ -1,0 +1,4 @@
+yfinance
+requests
+feedparser
+pyyaml

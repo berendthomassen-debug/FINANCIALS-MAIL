@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>De Ochtendbrief — {{DATUM}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF0F4; --panel:#FFFFFF; --ink:#141F2D; --grijs:#5B6875;
+  --lijn:#DCE1E8; --accent:#E8930C; --nacht:#141F2D;
+  --up:#157A4A; --down:#C24141;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);
+  font:16px/1.6 "Archivo",system-ui,sans-serif;padding-bottom:64px}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+header{background:var(--nacht);color:#F4F6F9;padding:34px 0 26px}
+.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:#9FB0C2}
+h1{font-weight:800;font-stretch:80%;font-size:clamp(34px,6vw,54px);letter-spacing:-.01em;line-height:1.05;margin:8px 0 4px}
+h1 .zon{color:var(--accent)}
+.datum{font:500 14px var(--mono);color:#C7D1DC}
+.horizon{height:5px;background:linear-gradient(90deg,#141F2D 0%,#3A4A63 35%,#B4692A 70%,#E8930C 100%)}
+
+section{margin-top:38px}
+h2{font-weight:800;font-stretch:82%;font-size:22px;letter-spacing:-.01em;display:flex;align-items:baseline;gap:10px;margin-bottom:14px}
+h2::after{content:"";flex:1;height:1px;background:var(--lijn)}
+.panel{background:var(--panel);border:1px solid var(--lijn);border-radius:10px;padding:20px 22px}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.grid-2{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(420px,1fr))}
+.paneltitel{font:600 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--grijs);margin-bottom:10px}
+.sub{display:block;font:500 12px var(--mono);color:var(--grijs)}
+
+table{width:100%;border-collapse:collapse}
+td,th{padding:9px 6px 9px 0;border-top:1px solid var(--lijn);vertical-align:middle;text-align:left}
+th{font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--grijs);border-top:0}
+tr:first-child td{border-top:0}
+thead+tbody tr:first-child td{border-top:1px solid var(--lijn)}
+.naam{font-weight:600}
+.koers,.delta-cel{font-family:var(--mono);font-size:14px;text-align:right;white-space:nowrap;padding-left:10px}
+.delta{font-family:var(--mono);font-size:13px}
+.delta.up{color:var(--up)} .delta.down{color:var(--down)}
+.dim{color:var(--grijs)}
+.grafiek{width:118px;padding-left:12px}
+.spark{width:110px;height:30px;display:block}
+
+/* live tracker */
+.tracker{border:1px solid var(--lijn);border-top:4px solid var(--accent)}
+.tracker-kop{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--up);margin-right:6px;animation:puls 2s infinite}
+@keyframes puls{50%{opacity:.3}}
+.totaal{font:600 26px var(--mono)}
+.tracker-status{font:500 12px var(--mono);color:var(--grijs)}
+.flash-up{animation:fu 1s} .flash-down{animation:fd 1s}
+@keyframes fu{from{background:#E2F3EA}} @keyframes fd{from{background:#F8E7E7}}
+
+.tekst p{margin-bottom:12px;max-width:75ch}
+.tekst p:last-child{margin-bottom:0}
+.ref{font:600 12px var(--mono);color:var(--accent);text-decoration:none;padding:0 2px}
+.ref:hover{text-decoration:underline}
+
+.ag-datum{font-family:var(--mono);font-size:13px;color:var(--grijs);white-space:nowrap;padding-right:16px}
+.badge{font:600 11px var(--mono);padding:3px 9px;border-radius:99px;white-space:nowrap}
+.b-hoog{background:#FBEAD3;color:#8A5205}
+.b-middel{background:#E3E9F0;color:#3C4C60}
+.b-laag{background:#EDF0F4;color:#6C7885}
+
+.kaarten{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.kaart{background:var(--panel);border:1px solid var(--lijn);border-left:4px solid var(--accent);border-radius:10px;padding:16px 18px}
+.kaart-kop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.kaart h4{font-weight:700;font-size:16px}
+.kaart p{font-size:15px;color:#33404E}
+.kaart-voet{margin-top:10px}
+.scen-bull{border-left-color:var(--up)}
+.scen-bear{border-left-color:var(--down)}
+.scen-basis{border-left-color:#3C4C60}
+
+.nieuws{list-style:none}
+.nieuws li{padding:10px 0;border-top:1px solid var(--lijn)}
+.nieuws li:first-child{border-top:0}
+.nieuws a{text-decoration:none;font-weight:600}
+.nieuws a:hover{text-decoration:underline}
+.refnum{font:600 12px var(--mono);color:var(--accent);margin-right:8px}
+.bron{display:block;font:500 12px var(--mono);color:var(--grijs);margin-top:2px}
+
+.craap-cel{font-family:var(--mono);font-size:13px;text-align:center;padding-left:8px}
+.craap-cel.totaal{font-weight:600}
+.craap-uitleg{font-size:13px;color:var(--grijs);margin-top:10px;max-width:80ch}
+
+.gauge-panel{text-align:center}
+.gauge{max-width:260px;margin:6px auto 0;display:block}
+.gauge-waarde{font:600 30px var(--mono);fill:var(--ink)}
+.gauge-sub{font:500 12px var(--mono);fill:var(--grijs)}
+.gauge-voet{font-size:13px;color:var(--grijs);max-width:44ch;margin:8px auto 0;text-align:center}
+
+
+/* ---- voorpagina ---- */
+.voorpagina{background:var(--panel);border:1px solid var(--lijn);border-top:5px solid var(--accent);
+  border-radius:12px;padding:26px 28px;margin-top:26px}
+.pf-waarde{font:700 clamp(34px,7vw,52px) var(--mono);letter-spacing:-.02em;line-height:1.1}
+.pf-label{font:600 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--grijs)}
+.pf-blok{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-end;justify-content:space-between;
+  padding-bottom:18px;border-bottom:1px solid var(--lijn);margin-bottom:18px}
+.kernpunten{list-style:none;counter-reset:kp}
+.kernpunten li{position:relative;padding:9px 0 9px 34px;border-top:1px solid var(--lijn);font-size:15.5px}
+.kernpunten li:first-child{border-top:0}
+.kernpunten li::before{counter-increment:kp;content:counter(kp);position:absolute;left:0;top:9px;
+  width:22px;height:22px;border-radius:50%;background:var(--nacht);color:#fff;
+  font:600 11px/22px var(--mono);text-align:center}
+
+/* ---- inhoudsopgave ---- */
+.toc{background:var(--nacht);border-radius:10px;padding:18px 20px;margin-top:26px}
+.toc-titel{font:600 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#9FB0C2;margin-bottom:12px}
+.toc-lijst{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));list-style:none}
+.toc-lijst a{display:block;padding:10px 12px;background:#1E2C3E;border-radius:7px;color:#E8EDF3;
+  text-decoration:none;font-weight:600;font-size:14.5px;transition:background .15s,transform .15s}
+.toc-lijst a:hover{background:var(--accent);color:#141F2D;transform:translateY(-1px)}
+.toc-lijst span{display:block;font:500 11px var(--mono);color:#9FB0C2;margin-top:2px}
+.toc-lijst a:hover span{color:#3E2A05}
+
+/* ---- gecombineerde onderwerpsecties ---- */
+.onderwerp{background:var(--panel);border:1px solid var(--lijn);border-radius:10px;overflow:hidden}
+.onderwerp-koers{padding:18px 22px;background:#F7F9FB;border-bottom:1px solid var(--lijn)}
+.onderwerp-tekst{padding:20px 22px}
+section[id]{scroll-margin-top:20px}
+.terug{font:500 12px var(--mono);color:var(--grijs);text-decoration:none;margin-left:auto}
+.terug:hover{color:var(--accent)}
+
+/* ---- speculatie ---- */
+.speculatie{background:#FFFDF8;border:1px solid #EBD9B8;border-left:5px solid var(--accent);
+  border-radius:10px;padding:22px 24px}
+.spec-waarschuwing{font:600 12px var(--mono);color:#8A5205;background:#FBEAD3;
+  padding:10px 14px;border-radius:7px;margin-bottom:16px}
+
+footer{margin-top:44px;font:500 12px var(--mono);color:var(--grijs)}
+@media (prefers-reduced-motion:no-preference){
+  section{animation:op .5s ease both}
+  @keyframes op{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+}
+@media (prefers-reduced-motion:reduce){.live-dot{animation:none}}
+@media (max-width:720px){.grafiek,.verberg-mobiel{display:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Dagelijks marktoverzicht · 07:00</div>
+    <h1>De Ochtendbrief<span class="zon">.</span></h1>
+    <div class="datum">{{DATUM}}</div>
+  </div>
+</header>
+<div class="horizon"></div>
+
+<div class="wrap">
+
+  <!-- ================= VOORPAGINA ================= -->
+  <div class="voorpagina">
+    <div class="pf-blok">
+      <div>
+        <div class="pf-label">Waarde van jouw portefeuille</div>
+        <div class="pf-waarde js-totaal">{{TOTAAL}}</div>
+        <div class="tracker-status js-status">Live via Bitvavo · ververst elke 15 seconden</div>
+      </div>
+      <div style="flex:1;min-width:260px">
+        <div class="pf-label" style="margin-bottom:8px">Het belangrijkste nieuws</div>
+        <div class="tekst">{{HOOFDVERHAAL}}</div>
+      </div>
+    </div>
+    <div class="pf-label" style="margin-bottom:6px">Kernpunten van vandaag</div>
+    <ul class="kernpunten">{{KERNPUNTEN}}</ul>
+  </div>
+
+  <!-- ================= INHOUDSOPGAVE ================= -->
+  <nav class="toc">
+    <div class="toc-titel">Inhoud — spring direct naar</div>
+    <ul class="toc-lijst">
+      <li><a href="#crypto">Crypto<span>portefeuille &amp; koersen</span></a></li>
+      <li><a href="#aandelen">Aandelen<span>indices wereldwijd</span></a></li>
+      <li><a href="#macro">Macrofactoren<span>rente, inflatie, groei</span></a></li>
+      <li><a href="#grondstoffen">Grondstoffen<span>goud, olie, zilver</span></a></li>
+      <li><a href="#valuta">Valuta &amp; rente<span>EUR/USD, curve</span></a></li>
+      <li><a href="#speculatie">Speculatie<span>vooruitblik</span></a></li>
+    </ul>
+  </nav>
+
+  <section>
+    <h2>Het beeld van vandaag</h2>
+    <div class="panel tekst">{{SAMENVATTING}}</div>
+  </section>
+
+  <!-- ================= CRYPTO ================= -->
+  <section id="crypto">
+    <h2>Crypto &amp; jouw portefeuille <a href="#" class="terug">↑ naar boven</a></h2>
+    <div class="onderwerp">
+      <div class="onderwerp-koers">
+        <div class="paneltitel">Live koersen · euro · Bitvavo</div>
+        <table>
+          <thead><tr><th>Munt</th><th style="text-align:right">Koers</th>
+            <th style="text-align:right">24u</th><th style="text-align:right">7d</th>
+            <th style="text-align:right" class="verberg-mobiel">30d</th>
+            <th style="text-align:right" class="verberg-mobiel">Marktkap.</th>
+            <th style="text-align:right">Jouw waarde</th><th class="verberg-mobiel"></th></tr></thead>
+          <tbody>{{TRACKER}}</tbody>
+        </table>
+      </div>
+      <div class="onderwerp-tekst tekst">
+        <div class="paneltitel">Analyse</div>
+        {{ANALYSE_CRYPTO}}
+      </div>
+    </div>
+
+    <h2 style="margin-top:26px">Reflectie op je portefeuille</h2>
+    <div class="panel tekst" style="margin-bottom:14px">{{REFLECTIE}}</div>
+    <div class="kaarten">{{PER_COIN}}</div>
+  </section>
+
+  <!-- ================= AANDELEN ================= -->
+  <section id="aandelen">
+    <h2>Aandelen <a href="#" class="terug">↑ naar boven</a></h2>
+    <div class="onderwerp">
+      <div class="onderwerp-koers">
+        <div class="paneltitel">Indices wereldwijd</div>
+        <table><thead><tr><th></th><th style="text-align:right">Koers</th>
+          <th style="text-align:right">24u</th><th style="text-align:right">7d</th>
+          <th class="verberg-mobiel"></th></tr></thead><tbody>{{MARKTEN}}</tbody></table>
+      </div>
+      <div class="onderwerp-tekst tekst">
+        <div class="paneltitel">Analyse</div>
+        {{ANALYSE_AANDELEN}}
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MACRO ================= -->
+  <section id="macro">
+    <h2>Macrofactoren <a href="#" class="terug">↑ naar boven</a></h2>
+    <div class="grid-2" style="margin-bottom:18px">
+      <div class="panel gauge-panel">
+        <div class="paneltitel">Fear &amp; Greed-index (crypto)</div>
+        {{FNG_GAUGE}}
+        <p class="gauge-voet">{{FNG_VOET}}</p>
+      </div>
+      <div class="panel gauge-panel">
+        <div class="paneltitel">Recessie-indicator (VS, 12 maanden)</div>
+        {{REC_GAUGE}}
+        <p class="gauge-voet">{{REC_VOET}}</p>
+      </div>
+    </div>
+    <div class="panel tekst">
+      <div class="paneltitel">Wat stuurt de markt?</div>
+      {{MACRO_UITLEG}}
+    </div>
+
+    <h2 style="margin-top:26px">Macro-agenda — komende twee weken</h2>
+    <div class="panel"><table>{{AGENDA}}</table></div>
+
+    <h2 style="margin-top:26px">Opmerkelijk vandaag</h2>
+    <div class="kaarten">{{OPMERKELIJK}}</div>
+  </section>
+
+  <!-- ================= GRONDSTOFFEN ================= -->
+  <section id="grondstoffen">
+    <h2>Grondstoffen <a href="#" class="terug">↑ naar boven</a></h2>
+    <div class="onderwerp">
+      <div class="onderwerp-koers">
+        <div class="paneltitel">Goud, olie &amp; zilver</div>
+        <table><thead><tr><th></th><th style="text-align:right">Koers</th>
+          <th style="text-align:right">24u</th><th style="text-align:right">7d</th>
+          <th class="verberg-mobiel"></th></tr></thead><tbody>{{GRONDSTOFFEN}}</tbody></table>
+      </div>
+      <div class="onderwerp-tekst tekst">
+        <div class="paneltitel">Analyse</div>
+        {{ANALYSE_GRONDSTOFFEN}}
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= VALUTA & RENTE ================= -->
+  <section id="valuta">
+    <h2>Valuta &amp; rente <a href="#" class="terug">↑ naar boven</a></h2>
+    <div class="onderwerp">
+      <div class="onderwerp-koers">
+        <div class="paneltitel">Wisselkoersen &amp; kapitaalmarktrente</div>
+        <table><thead><tr><th></th><th style="text-align:right">Koers</th>
+          <th style="text-align:right">24u</th><th style="text-align:right">7d</th>
+          <th class="verberg-mobiel"></th></tr></thead><tbody>{{FX}}</tbody></table>
+      </div>
+      <div class="onderwerp-tekst tekst">
+        <div class="paneltitel">Analyse</div>
+        {{ANALYSE_VALUTA}}
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Scenario's</h2>
+    <div class="kaarten">{{SCENARIOS}}</div>
+  </section>
+
+  <section>
+    <h2>Verwachtingen</h2>
+    <div class="kaarten">{{VERWACHTINGEN}}</div>
+  </section>
+
+  <section>
+    <h2>Risico-radar</h2>
+    <div class="panel"><table>{{RISICO}}</table></div>
+  </section>
+
+  <section>
+    <h2>Nieuwskoppen (bronnen)</h2>
+    <div class="panel"><ul class="nieuws">{{NIEUWS}}</ul></div>
+  </section>
+
+  <section>
+    <h2>Bronverantwoording — CRAAP-toets</h2>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Bron</th><th class="craap-cel">C</th><th class="craap-cel">R</th>
+          <th class="craap-cel">A</th><th class="craap-cel">A</th><th class="craap-cel">P</th>
+          <th class="craap-cel">Score</th><th>Toelichting</th></tr></thead>
+        <tbody>{{CRAAP}}</tbody>
+      </table>
+      <p class="craap-uitleg">CRAAP-toets: elke bron is beoordeeld (1&ndash;5) op <strong>C</strong>urrency
+        (actualiteit), <strong>R</strong>elevance (relevantie), <strong>A</strong>uthority (autoriteit),
+        <strong>A</strong>ccuracy (nauwkeurigheid) en <strong>P</strong>urpose (doel/objectiviteit).
+        De [n]-verwijzingen in de tekst linken naar de betreffende nieuwskop.</p>
+    </div>
+  </section>
+
+  <!-- ================= SPECULATIE ================= -->
+  <section id="speculatie">
+    <h2>Speculatieve beredenering <a href="#" class="terug">↑ naar boven</a></h2>
+    <div class="speculatie tekst">
+      <div class="spec-waarschuwing">⚠ Nadrukkelijk speculatief — dit is hardop nadenken over
+        mogelijke scenario's, geen voorspelling en geen beleggingsadvies.</div>
+      {{SPECULATIE}}
+    </div>
+  </section>
+
+  <footer>Automatisch gegenereerd · Geen beleggingsadvies · Data: Yahoo Finance &amp; CoinGecko · Analyse: Claude</footer>
+</div>
+
+<script>
+// ---- Live tracker: Bitvavo (realtime beursdata) elke 15 s, CoinGecko als reserve ----
+const HOLDINGS = {{HOLDINGS_JSON}};
+const eur = (v, dec) => "€ " + v.toLocaleString("nl-NL", {minimumFractionDigits: dec, maximumFractionDigits: dec});
+
+function updateRij(h, nieuw, ch) {
+  const rij = document.querySelector(`tr[data-coin="${h.id}"]`); if (!rij) return 0;
+  const prijsCel = rij.querySelector(".js-prijs");
+  const oud = parseFloat(prijsCel.textContent.replace(/[^0-9,]/g, "").replace(",", "."));
+  prijsCel.textContent = eur(nieuw, nieuw < 5 ? 4 : 2);
+  if (ch !== null) {
+    const up = ch >= 0;
+    rij.querySelector(".js-24u").innerHTML =
+      `<span class="delta ${up ? "up" : "down"}">${up ? "▲" : "▼"} ${Math.abs(ch).toFixed(2)}%</span>`;
+  }
+  const waarde = h.aantal * nieuw;
+  rij.querySelector(".js-waarde").textContent = eur(waarde, 2);
+  const badge = document.querySelector(`.js-coin-waarde[data-coin="${h.id}"]`);
+  if (badge) badge.textContent = eur(waarde, 2);
+  if (oud && Math.abs(nieuw - oud) > 1e-9) {
+    rij.classList.remove("flash-up", "flash-down"); void rij.offsetWidth;
+    rij.classList.add(nieuw > oud ? "flash-up" : "flash-down");
+  }
+  return waarde;
+}
+
+function toonStatus(bron) {
+  document.querySelector(".js-status").textContent =
+    `Live via ${bron} · laatst ververst ${new Date().toLocaleTimeString("nl-NL")} (elke 15 s)`;
+}
+
+async function viaBitvavo() {
+  const r = await fetch("https://api.bitvavo.com/v2/ticker/24h");
+  if (!r.ok) throw new Error(r.status);
+  const lijst = await r.json();
+  const per = {}; for (const t of lijst) per[t.market] = t;
+  let totaal = 0, gevonden = 0;
+  for (const h of HOLDINGS) {
+    const t = per[h.market]; if (!t || !t.last) continue;
+    const last = parseFloat(t.last);
+    const open = t.open ? parseFloat(t.open) : null;
+    const ch = open ? (last - open) / open * 100 : null;
+    totaal += updateRij(h, last, ch); gevonden++;
+  }
+  if (!gevonden) throw new Error("geen markten gevonden");
+  document.querySelector(".js-totaal").textContent = eur(totaal, 2);
+  toonStatus("Bitvavo");
+}
+
+async function viaCoinGecko() {
+  const ids = HOLDINGS.map(h => h.id).join(",");
+  const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur&include_24hr_change=true`);
+  if (!r.ok) throw new Error(r.status);
+  const d = await r.json();
+  let totaal = 0;
+  for (const h of HOLDINGS) {
+    const info = d[h.id]; if (!info) continue;
+    totaal += updateRij(h, info.eur, info.eur_24h_change ?? null);
+  }
+  document.querySelector(".js-totaal").textContent = eur(totaal, 2);
+  toonStatus("CoinGecko (reserve)");
+}
+
+async function ververs() {
+  try { await viaBitvavo(); }
+  catch (e1) {
+    try { await viaCoinGecko(); }
+    catch (e2) {
+      document.querySelector(".js-status").textContent =
+        "Verversen mislukt — de getoonde koersen zijn van het genereren van deze pagina.";
+    }
+  }
+}
+ververs();
+setInterval(ververs, 15000);
+</script>
+</body>
+</html>

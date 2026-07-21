@@ -1,0 +1,51 @@
+# ---- Inhoud van de ochtendbrief ----
+
+indices:
+  - {symbol: "^AEX",   name: "AEX"}
+  - {symbol: "^GSPC",  name: "S&P 500"}
+  - {symbol: "^DJI",   name: "Dow Jones"}
+  - {symbol: "^IXIC",  name: "Nasdaq"}
+  - {symbol: "^GDAXI", name: "DAX"}
+  - {symbol: "^FTSE",  name: "FTSE 100"}
+  - {symbol: "^N225",  name: "Nikkei 225"}
+
+fx_rates:
+  - {symbol: "EURUSD=X", name: "EUR/USD"}
+  - {symbol: "EURGBP=X", name: "EUR/GBP"}
+  - {symbol: "^TNX",     name: "US 10-jaars rente", suffix: " %"}
+
+commodities:
+  - {symbol: "GC=F", name: "Goud (USD/oz)"}
+  - {symbol: "BZ=F", name: "Brent-olie (USD)"}
+  - {symbol: "SI=F", name: "Zilver (USD/oz)"}
+
+# Dit is tevens je live tracker én portfolio.
+# 'market' = Bitvavo-handelspaar (primaire, realtime bron); 'id' = CoinGecko (reserve + grafiekjes)
+crypto:
+  - {id: avalanche-2,      ticker: AVAX,   market: AVAX-EUR,   aantal: 99.3}
+  - {id: ripple,           ticker: XRP,    market: XRP-EUR,    aantal: 3800}
+  - {id: hedera-hashgraph, ticker: HBAR,   market: HBAR-EUR,   aantal: 9061}
+  - {id: algorand,         ticker: ALGO,   market: ALGO-EUR,   aantal: 4098}
+  - {id: cosmos,           ticker: ATOM,   market: ATOM-EUR,   aantal: 159}
+  - {id: render-token,     ticker: RENDER, market: RENDER-EUR, aantal: 147}
+  - {id: celestia,         ticker: TIA,    market: TIA-EUR,    aantal: 309}
+  - {id: arweave,          ticker: AR,     market: AR-EUR,     aantal: 52}
+  - {id: woo-network,      ticker: WOO,    market: WOO-EUR,    aantal: 6770}
+
+# Nieuwsbronnen — beoordeeld met de CRAAP-test (zie 'sources' hieronder)
+news_feeds:
+  - {url: "https://feeds.nos.nl/nosnieuwseconomie", source: "NOS Economie"}
+  - {url: "https://www.nu.nl/rss/Economie",         source: "NU.nl Economie"}
+  - {url: "https://www.cnbc.com/id/10000664/device/rss/rss.html", source: "CNBC Finance"}
+  - {url: "https://www.coindesk.com/arc/outboundfeeds/rss/",      source: "CoinDesk"}
+  - {url: "https://www.ecb.europa.eu/rss/press.html",             source: "ECB (persberichten)"}
+
+# CRAAP-beoordeling per bron: Currency, Relevance, Authority, Accuracy, Purpose (1-5)
+sources:
+  - {name: "NOS Economie",       type: "Publieke omroep (NL)",        c: 5, r: 4, a: 5, ac: 5, p: 5, note: "Onafhankelijke publieke nieuwsorganisatie, redactionele controle"}
+  - {name: "NU.nl Economie",     type: "Nieuwsmedium (NL)",           c: 5, r: 4, a: 4, ac: 4, p: 4, note: "Snel, breed economisch nieuws; commercieel maar redactioneel gescheiden"}
+  - {name: "CNBC Finance",       type: "Financieel nieuwsmedium (VS)", c: 5, r: 5, a: 4, ac: 4, p: 4, note: "Gespecialiseerd in markten; let op Amerikaans perspectief"}
+  - {name: "CoinDesk",           type: "Crypto-vakmedium",            c: 5, r: 5, a: 4, ac: 4, p: 3, note: "Toonaangevend in crypto; sector-belang vraagt kritisch lezen"}
+  - {name: "ECB (persberichten)", type: "Centrale bank (primair)",    c: 5, r: 5, a: 5, ac: 5, p: 5, note: "Primaire bron voor monetair beleid eurozone"}
+  - {name: "Yahoo Finance",      type: "Marktdata-aggregator",        c: 5, r: 5, a: 4, ac: 4, p: 4, note: "Koersdata van beurzen; vertraging tot 15 min mogelijk"}
+  - {name: "CoinGecko",          type: "Crypto-data-aggregator",      c: 5, r: 5, a: 4, ac: 4, p: 4, note: "Geaggregeerde crypto-koersen over vele beurzen"}
