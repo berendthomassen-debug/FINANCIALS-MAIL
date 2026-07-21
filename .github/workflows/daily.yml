@@ -1,0 +1,78 @@
+name: Ochtendbrief genereren
+
+on:
+  schedule:
+    - cron: "0 5 * * 1-5"   # elke werkdag 05:00 UTC = 07:00 NL (zomertijd)
+  workflow_dispatch:          # handmatig starten kan ook
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dependencies installeren
+        run: pip install -r requirements.txt
+
+      - name: Ollama installeren (gratis, lokaal AI-model — geen API-kosten)
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve &
+          for i in $(seq 1 30); do
+            curl -s http://localhost:11434 >/dev/null 2>&1 && break
+            sleep 1
+          done
+          ollama pull ${{ vars.OLLAMA_MODEL || 'qwen2.5:7b' }}
+
+      - name: Ochtendbrief genereren
+        env:
+          OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL || 'qwen2.5:7b' }}
+        run: python generate.py
+
+      - name: Datum bepalen
+        id: datum
+        run: echo "vandaag=$(TZ=Europe/Amsterdam date '+%d-%m-%Y')" >> $GITHUB_OUTPUT
+
+      - name: Ochtendbrief mailen
+        if: ${{ secrets.MAIL_USERNAME != '' }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: De Ochtendbrief
+          to: ${{ secrets.MAIL_TO }}
+          subject: "☀️ De Ochtendbrief — ${{ steps.datum.outputs.vandaag }}"
+          html_body: file://docs/index.html
+          convert_markdown: false
+
+      - name: Pagina klaarzetten voor publicatie
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publiceren naar GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
