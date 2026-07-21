@@ -17,6 +17,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
     steps:
       - uses: actions/checkout@v4
 
@@ -47,7 +49,7 @@ jobs:
         run: echo "vandaag=$(TZ=Europe/Amsterdam date '+%d-%m-%Y')" >> $GITHUB_OUTPUT
 
       - name: Ochtendbrief mailen
-        if: ${{ secrets.MAIL_USERNAME != '' }}
+        if: ${{ env.MAIL_USERNAME != '' }}
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
