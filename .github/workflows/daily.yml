@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
     steps:
       - uses: actions/checkout@v4
 
@@ -62,6 +63,19 @@ jobs:
           subject: "☀️ De Ochtendbrief — ${{ steps.datum.outputs.vandaag }}"
           html_body: file://docs/index.html
           convert_markdown: false
+
+      - name: Pushmelding sturen (ntfy)
+        if: ${{ env.NTFY_TOPIC != '' }}
+        run: |
+          PAGINA="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          curl -sS \
+            -H "Title: De Ochtendbrief - ${{ steps.datum.outputs.vandaag }}" \
+            -H "Tags: sunrise,chart_with_upwards_trend" \
+            -H "Priority: default" \
+            -H "Click: $PAGINA" \
+            -H "Actions: view, Open ochtendbrief, $PAGINA" \
+            --data-binary @docs/notificatie.txt \
+            "https://ntfy.sh/${{ secrets.NTFY_TOPIC }}"
 
       - name: Pagina klaarzetten voor publicatie
         uses: actions/upload-pages-artifact@v3
