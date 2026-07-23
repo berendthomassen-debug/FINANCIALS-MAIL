@@ -1,35 +1,34 @@
 name: Ochtendbrief genereren
-
+ 
 on:
   schedule:
     - cron: "0 5 * * 1-5"   # elke werkdag 05:00 UTC = 07:00 NL (zomertijd)
   workflow_dispatch:          # handmatig starten kan ook
-
+ 
 permissions:
   contents: read
   pages: write
   id-token: write
-
+ 
 concurrency:
   group: pages
   cancel-in-progress: true
-
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
       MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
     steps:
       - uses: actions/checkout@v4
-
+ 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
+ 
       - name: Dependencies installeren
         run: pip install -r requirements.txt
-
+ 
       - name: Ollama installeren (gratis, lokaal AI-model — geen API-kosten)
         run: |
           curl -fsSL https://ollama.com/install.sh | sh
@@ -39,16 +38,20 @@ jobs:
             sleep 1
           done
           ollama pull ${{ vars.OLLAMA_MODEL || 'qwen2.5:7b' }}
-
+ 
       - name: Ochtendbrief genereren
         env:
           OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL || 'qwen2.5:7b' }}
         run: python generate.py
-
-      - name: Datum bepalen
+ 
+      - name: Datum bepalen en bijlage klaarzetten
         id: datum
-        run: echo "vandaag=$(TZ=Europe/Amsterdam date '+%d-%m-%Y')" >> $GITHUB_OUTPUT
-
+        run: |
+          echo "vandaag=$(TZ=Europe/Amsterdam date '+%d-%m-%Y')" >> $GITHUB_OUTPUT
+          echo "bestand=$(TZ=Europe/Amsterdam date '+%Y-%m-%d')" >> $GITHUB_OUTPUT
+          mkdir -p bijlage
+          cp docs/index.html "bijlage/Ochtendbrief-$(TZ=Europe/Amsterdam date '+%Y-%m-%d').html"
+ 
       - name: Ochtendbrief mailen
         if: ${{ env.MAIL_USERNAME != '' }}
         uses: dawidd6/action-send-mail@v3
@@ -61,27 +64,15 @@ jobs:
           from: De Ochtendbrief
           to: ${{ secrets.MAIL_TO }}
           subject: "☀️ De Ochtendbrief — ${{ steps.datum.outputs.vandaag }}"
-          html_body: file://docs/index.html
+          body: file://docs/notificatie.txt
+          attachments: bijlage/Ochtendbrief-${{ steps.datum.outputs.bestand }}.html
           convert_markdown: false
-
-      - name: Pushmelding sturen (ntfy)
-        if: ${{ env.NTFY_TOPIC != '' }}
-        run: |
-          PAGINA="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
-          curl -sS \
-            -H "Title: De Ochtendbrief - ${{ steps.datum.outputs.vandaag }}" \
-            -H "Tags: sunrise,chart_with_upwards_trend" \
-            -H "Priority: default" \
-            -H "Click: $PAGINA" \
-            -H "Actions: view, Open ochtendbrief, $PAGINA" \
-            --data-binary @docs/notificatie.txt \
-            "https://ntfy.sh/${{ secrets.NTFY_TOPIC }}"
-
+ 
       - name: Pagina klaarzetten voor publicatie
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs
-
+ 
   deploy:
     needs: build
     runs-on: ubuntu-latest
